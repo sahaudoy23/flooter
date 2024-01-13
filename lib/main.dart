@@ -32,21 +32,23 @@ class _MyImageWidgetState extends State<MyImageWidget> {
   }
 
   Future<void> _loadSettings() async {
-    String? savedApiUrl = _prefs.getString('apiUrl');
-    if (savedApiUrl != null) {
-      _urlController.text = savedApiUrl;
+    String? savedSeed = _prefs.getString('seed');
+    if (savedSeed != null) {
+      _urlController.text = savedSeed;
+    } else {
+      _urlController.text = "-1";
     }
   }
 
   Future<void> _saveSettings() async {
-    String apiUrl = _urlController.text.trim();
-    if (apiUrl.isNotEmpty) {
-      await _prefs.setString('apiUrl', apiUrl);
+    String seed = _urlController.text.trim();
+    if (seed.isNotEmpty) {
+      await _prefs.setString('seed', seed);
     }
   }
 
   Future<void> _generateImage(String query, int sharpness) async {
-    String? apiUrl = _urlController.text.trim();
+    String? seed = _urlController.text.trim();
     await _saveSettings();
 
     setState(() {
@@ -67,7 +69,7 @@ class _MyImageWidgetState extends State<MyImageWidget> {
         "cn_type3": "ImagePrompt",
         "cn_type4": "ImagePrompt",
         "sharpness": sharpness,
-        "image_seed": -1,
+        "image_seed": int.parse(seed),
         "uov_method": "Disabled",
         "image_number": 1,
         "guidance_scale": 4,
@@ -109,7 +111,7 @@ class _MyImageWidgetState extends State<MyImageWidget> {
           content: TextField(
             controller: _urlController,
             decoration: const InputDecoration(
-              labelText: 'Enter API URL',
+              labelText: 'Enter Img Seed, -1 is random',
               border: OutlineInputBorder(),
             ),
           ),
@@ -122,7 +124,8 @@ class _MyImageWidgetState extends State<MyImageWidget> {
             ),
             TextButton(
               onPressed: () {
-                _generateImage(_queryController.text.trim(), _sharpness.toInt());
+                _generateImage(
+                    _queryController.text.trim(), _sharpness.toInt());
                 Navigator.of(context).pop();
               },
               child: const Text('Save'),
@@ -164,7 +167,7 @@ class _MyImageWidgetState extends State<MyImageWidget> {
               const SizedBox(height: 16),
               Text(
                 'Sharpness: $_sharpness',
-                style: TextStyle(fontSize: 16),
+                style: const TextStyle(fontSize: 16),
               ),
               Slider(
                 value: _sharpness,
