@@ -13,7 +13,8 @@ class MyImageWidget extends StatefulWidget {
 }
 
 class _MyImageWidgetState extends State<MyImageWidget> {
-  String? _imageBytes;
+  String? _imageBytes; // comment out if using replicate
+  //String? _imageUrl; //comment out if using runpod
   String? _errorMessage;
   final TextEditingController _queryController = TextEditingController();
   final TextEditingController _urlController = TextEditingController();
@@ -52,14 +53,18 @@ class _MyImageWidgetState extends State<MyImageWidget> {
     await _saveSettings();
 
     setState(() {
-      _imageBytes = null;
+      //_imageurl = null; // comment out if using runpod
+      _imageBytes = null; // comment out if using replicate
       _errorMessage = null;
     });
 
     try {
-      String modelVersion = "mhwg0w51p0ew5s"; // model version for replicate api
+      //String modelVersion = "a7e8fa2f96b01d02584de2b3029a8452b9bf0c8fa4127a6d1cfd406edfad54fb"; // comment out if using runpod
+      //String apiKey = "r8_2QsFXKi8ujufno8DHnuQRV67I94uESA2fUPxm"; // comment out if using runpod
+
+      String modelVersion = "mhwg0w51p0ew5s"; // comment out if using replicate
       String apiKey =
-          "ILI4MIZKZR45KE226BODAD5ENT9CNQZA735EEFX7"; // replace with your api key
+          "ILI4MIZKZR45KE226BODAD5ENT9CNQZA735EEFX7"; // comment out if using replicate
 
       Map<String, Object> input = {
         "prompt": query,
@@ -86,17 +91,24 @@ class _MyImageWidgetState extends State<MyImageWidget> {
         "inpaint_additional_prompt": ""
       };
 
-      String jsonString = await createGetJson(modelVersion, apiKey, input);
+      String jsonString = await createGetJson(
+          // comment out for replicate use
+          modelVersion,
+          apiKey,
+          input); // comment out for replicate use
+
+      //String jsonString = await createGetJson(modelVersion, apiKey, input); //comment out for runpod
+
       var responseJson =
           jsonDecode(jsonString); //converts string to json object
+      String output = responseJson['output'][0];
 
-      // then you can parse the json file to get whatever value you need
-      // For this example, I want the 'output', which is a png link
-      String base64img = responseJson['output'][0];
-      List splitted = base64img.split(',');
-      String base64String = splitted[1];
+      List splitted = output.split(','); // comment out if using replicate
+      String base64String = splitted[1]; // comment out if using replicate
+
       setState(() {
-        _imageBytes = base64String;
+        //_imageUrl = output; // comment out if using runpod
+        _imageBytes = base64String; // comment out if using replicate
       });
     } catch (e) {
       setState(() {
@@ -197,8 +209,11 @@ class _MyImageWidgetState extends State<MyImageWidget> {
               const SizedBox(height: 20),
               Expanded(
                 child: Center(
-                  child: _imageBytes != null
-                      ? Image.memory(base64Decode(_imageBytes!))
+                  //child: _imageUrl != null // comment if using runpod
+                  child: _imageBytes != null // comment if using replicate
+                      //? Image.network(_imageUrl!)//comment if using runpod
+                      ? Image.memory(base64Decode(
+                          _imageBytes!)) // comment if using replicate
                       : _errorMessage != null
                           ? Text(
                               _errorMessage!,
