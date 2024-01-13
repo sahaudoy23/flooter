@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:replicate_json/replicate_json.dart';
+import 'runpod.dart';
 
 void main() => runApp(const MaterialApp(home: MyImageWidget()));
 
@@ -13,7 +13,8 @@ class MyImageWidget extends StatefulWidget {
 }
 
 class _MyImageWidgetState extends State<MyImageWidget> {
-  String? _imageUrl;
+  String? _imageBytes; // comment out if using replicate
+  //String? _imageUrl; //comment out if using runpod
   String? _errorMessage;
   final TextEditingController _queryController = TextEditingController();
   final TextEditingController _urlController = TextEditingController();
@@ -52,15 +53,18 @@ class _MyImageWidgetState extends State<MyImageWidget> {
     await _saveSettings();
 
     setState(() {
-      _imageUrl = null;
+      //_imageurl = null; // comment out if using runpod
+      _imageBytes = null; // comment out if using replicate
       _errorMessage = null;
     });
 
     try {
-      String modelVersion =
-          "a7e8fa2f96b01d02584de2b3029a8452b9bf0c8fa4127a6d1cfd406edfad54fb"; // model version for replicate api
+      //String modelVersion = "a7e8fa2f96b01d02584de2b3029a8452b9bf0c8fa4127a6d1cfd406edfad54fb"; // comment out if using runpod
+      //String apiKey = "r8_2QsFXKi8ujufno8DHnuQRV67I94uESA2fUPxm"; // comment out if using runpod
+
+      String modelVersion = "mhwg0w51p0ew5s"; // comment out if using replicate
       String apiKey =
-          "r8_2QsFXKi8ujufno8DHnuQRV67I94uESA2fUPxm"; // replace with your api key
+          "ILI4MIZKZR45KE226BODAD5ENT9CNQZA735EEFX7"; // comment out if using replicate
 
       Map<String, Object> input = {
         "prompt": query,
@@ -87,12 +91,24 @@ class _MyImageWidgetState extends State<MyImageWidget> {
         "inpaint_additional_prompt": ""
       };
 
-      String jsonString = await createAndGetJson(modelVersion, apiKey, input);
-      var responseJson = jsonDecode(jsonString);
+      String jsonString = await createGetJson(
+          // comment out for replicate use
+          modelVersion,
+          apiKey,
+          input); // comment out for replicate use
 
-      String pngLink = responseJson['output'][0];
+      //String jsonString = await createGetJson(modelVersion, apiKey, input); //comment out for runpod
+
+      var responseJson =
+          jsonDecode(jsonString); //converts string to json object
+      String output = responseJson['output'][0];
+
+      List splitted = output.split(','); // comment out if using replicate
+      String base64String = splitted[1]; // comment out if using replicate
+
       setState(() {
-        _imageUrl = pngLink;
+        //_imageUrl = output; // comment out if using runpod
+        _imageBytes = base64String; // comment out if using replicate
       });
     } catch (e) {
       setState(() {
@@ -193,8 +209,11 @@ class _MyImageWidgetState extends State<MyImageWidget> {
               const SizedBox(height: 20),
               Expanded(
                 child: Center(
-                  child: _imageUrl != null
-                      ? Image.network(_imageUrl!)
+                  //child: _imageUrl != null // comment if using runpod
+                  child: _imageBytes != null // comment if using replicate
+                      //? Image.network(_imageUrl!)//comment if using runpod
+                      ? Image.memory(base64Decode(
+                          _imageBytes!)) // comment if using replicate
                       : _errorMessage != null
                           ? Text(
                               _errorMessage!,
