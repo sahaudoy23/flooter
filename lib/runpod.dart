@@ -1,6 +1,3 @@
-/// Checks if you are awesome. Spoiler: you are.
-//TODO: setup logging
-//TODO: setup exceptions and error handling
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'dart:io';
@@ -104,8 +101,7 @@ Future<void> main() async {
   };
   String model = "mhwg0w51p0ew5s"; // model version for replicate api
 
-  String apiKey =
-      "ILI4MIZKZR45KE226BODAD5ENT9CNQZA735EEFX7"; //replace with your api key
+  String apiKey = "ILI4MIZKZR45KE226BODAD5ENT9CNQZA735EEFX7";
 
   String jsonString = await createGetJson(
     model,
