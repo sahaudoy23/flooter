@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:replicate_json/replicate_json.dart';
+import 'runpod.dart';
 
 void main() => runApp(const MaterialApp(home: MyImageWidget()));
 
@@ -13,7 +13,7 @@ class MyImageWidget extends StatefulWidget {
 }
 
 class _MyImageWidgetState extends State<MyImageWidget> {
-  String? _imageUrl;
+  String? _imageBytes;
   String? _errorMessage;
   final TextEditingController _queryController = TextEditingController();
   final TextEditingController _urlController = TextEditingController();
@@ -52,15 +52,14 @@ class _MyImageWidgetState extends State<MyImageWidget> {
     await _saveSettings();
 
     setState(() {
-      _imageUrl = null;
+      _imageBytes = null;
       _errorMessage = null;
     });
 
     try {
-      String modelVersion =
-          "a7e8fa2f96b01d02584de2b3029a8452b9bf0c8fa4127a6d1cfd406edfad54fb"; // model version for replicate api
+      String modelVersion = "mhwg0w51p0ew5s"; // model version for replicate api
       String apiKey =
-          "r8_2QsFXKi8ujufno8DHnuQRV67I94uESA2fUPxm"; // replace with your api key
+          "ILI4MIZKZR45KE226BODAD5ENT9CNQZA735EEFX7"; // replace with your api key
 
       Map<String, Object> input = {
         "prompt": query,
@@ -87,12 +86,17 @@ class _MyImageWidgetState extends State<MyImageWidget> {
         "inpaint_additional_prompt": ""
       };
 
-      String jsonString = await createAndGetJson(modelVersion, apiKey, input);
-      var responseJson = jsonDecode(jsonString);
+      String jsonString = await createGetJson(modelVersion, apiKey, input);
+      var responseJson =
+          jsonDecode(jsonString); //converts string to json object
 
-      String pngLink = responseJson['output'][0];
+      // then you can parse the json file to get whatever value you need
+      // For this example, I want the 'output', which is a png link
+      String base64img = responseJson['output'][0];
+      List splitted = base64img.split(',');
+      String base64String = splitted[1];
       setState(() {
-        _imageUrl = pngLink;
+        _imageBytes = base64String;
       });
     } catch (e) {
       setState(() {
@@ -193,8 +197,8 @@ class _MyImageWidgetState extends State<MyImageWidget> {
               const SizedBox(height: 20),
               Expanded(
                 child: Center(
-                  child: _imageUrl != null
-                      ? Image.network(_imageUrl!)
+                  child: _imageBytes != null
+                      ? Image.memory(base64Decode(_imageBytes!))
                       : _errorMessage != null
                           ? Text(
                               _errorMessage!,
